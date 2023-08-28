@@ -5,6 +5,7 @@ import com.yocy.youngfriend.model.domain.Team;
 import com.yocy.youngfriend.model.domain.User;
 import com.yocy.youngfriend.model.dto.TeamQuery;
 import com.yocy.youngfriend.model.request.TeamJoinRequest;
+import com.yocy.youngfriend.model.request.TeamQuitRequest;
 import com.yocy.youngfriend.model.request.TeamUpdateRequest;
 import com.yocy.youngfriend.model.vo.TeamUserVO;
 
@@ -48,4 +49,20 @@ public interface TeamService extends IService<Team> {
      * @return
      */
     Boolean joinTeam(TeamJoinRequest teamJoinRequest, User loginUser);
+
+    /**
+     * 退出队伍
+     * @param teamQuitRequest
+     * @param loginUser
+     * @return
+     */
+    Boolean quitTeam(TeamQuitRequest teamQuitRequest, User loginUser);
+
+    /**
+     * 删除（解散）队伍
+     * @param id
+     * @param loginUser
+     * @return
+     */
+    boolean deleteTeam(long id, User loginUser);
 }

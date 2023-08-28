@@ -9,6 +9,7 @@ import com.yocy.youngfriend.exception.BusinessException;
 import com.yocy.youngfriend.model.domain.User;
 import com.yocy.youngfriend.model.request.UserLoginRequest;
 import com.yocy.youngfriend.model.request.UserRegisterRequest;
+import com.yocy.youngfriend.model.vo.UserVO;
 import com.yocy.youngfriend.service.UserService;
 import com.yocy.youngfriend.common.ErrorCode;
 import lombok.extern.slf4j.Slf4j;
@@ -142,6 +143,7 @@ public class UserController {
         return ResultUtils.success(userList);
     }
 
+    // todo 推荐多个用户
     @GetMapping("/recommend")
     public BaseResponse<Page<User>> recommendUsers(long pageSize, long pageNum, HttpServletRequest request) {
         User loginUser = userService.getLoginUser(request);
@@ -163,6 +165,21 @@ public class UserController {
             log.error("redis set key error", e);
         }
         return ResultUtils.success(userPage);
+    }
+
+    /**
+     * 获取最匹配用户
+     * @param num
+     * @param request
+     * @return
+     */
+    @GetMapping("/match")
+    public BaseResponse<List<User>> matchUsers(long num, HttpServletRequest request) {
+        if (num <= 0 || num > 20) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        User loginUser = userService.getLoginUser(request);
+        return ResultUtils.success(userService.matchUsers(num, loginUser));
     }
     
     @PostMapping("/update")

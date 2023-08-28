@@ -8,8 +8,10 @@ import com.yocy.youngfriend.common.ErrorCode;
 import com.yocy.youngfriend.contant.UserConstant;
 import com.yocy.youngfriend.exception.BusinessException;
 import com.yocy.youngfriend.model.domain.User;
+import com.yocy.youngfriend.model.vo.UserVO;
 import com.yocy.youngfriend.service.UserService;
 import com.yocy.youngfriend.mapper.UserMapper;
+import com.yocy.youngfriend.utils.AlgorithmUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -18,13 +20,11 @@ import org.springframework.util.DigestUtils;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.yocy.youngfriend.contant.UserConstant.USER_LOGIN_STATE;
 
@@ -284,7 +284,30 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     public boolean isAdmin(User loginUser) {
         return loginUser != null && loginUser.getUserRole() == UserConstant.ADMIN_ROLE;
     }
-    
+
+    @Override
+    public List<User> matchUsers(long num, User loginUser) {
+        List<User> userList = this.list();
+        String tags = loginUser.getTags();
+        Gson gson = new Gson();
+        List<String> tagList = gson.fromJson(tags, new TypeToken<List<String>>(){}.getType());
+        SortedMap<Integer, Long> indexDistanceMap = new TreeMap<Integer, Long>();
+        for (int i = 0; i < userList.size(); i++) {
+            User user = userList.get(i);
+            String userTags = user.getTags();
+            if (StringUtils.isBlank(userTags)) {
+                continue;
+            }
+            List<String> userTagsList = gson.fromJson(userTags, new TypeToken<List<String>>(){}.getType());
+            long distance = AlgorithmUtils.minTagsDistance(tagList, userTagsList);
+            indexDistanceMap.put(i, distance);
+        }
+        List<Integer> maxDistanceIndexList = indexDistanceMap.keySet().stream().limit(num).collect(Collectors.toList());
+        return maxDistanceIndexList.stream().map(index -> 
+             getSafetyUser(userList.get(index))
+        ).collect(Collectors.toList());
+    }
+
     /**
      * 根据标签搜索用户(SQL 查询)
      *

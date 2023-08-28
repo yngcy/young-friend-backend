@@ -3,6 +3,7 @@ package com.yocy.youngfriend.service;
 import com.yocy.youngfriend.contant.UserConstant;
 import com.yocy.youngfriend.model.domain.User;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.yocy.youngfriend.model.vo.UserVO;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -91,4 +92,12 @@ public interface UserService extends IService<User> {
      * @return
      */
     boolean isAdmin(User loginUser);
+
+    /**
+     * 匹配用户
+     * @param num
+     * @param loginUser
+     * @return
+     */
+    List<User> matchUsers(long num, User loginUser);
 }
